@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -24,6 +24,7 @@ class User(Base):
     # Relationships
     referrals = relationship("User", remote_side=[referred_by])
     orders = relationship("Order", back_populates="user")
+    virtual_numbers = relationship("VirtualNumber", back_populates="user")
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -38,6 +39,36 @@ class Order(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     user = relationship("User", back_populates="orders")
+
+class VirtualNumber(Base):
+    """Store purchased virtual numbers"""
+    __tablename__ = 'virtual_numbers'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    phone_number = Column(String, nullable=False, unique=True)
+    service_name = Column(String, nullable=False)  # WhatsApp, Instagram, etc.
+    service_id = Column(Integer, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
+    
+    user = relationship("User", back_populates="virtual_numbers")
+    otps = relationship("OTP", back_populates="virtual_number", cascade="all, delete-orphan")
+
+class OTP(Base):
+    """Store OTPs for virtual numbers"""
+    __tablename__ = 'otps'
+    
+    id = Column(Integer, primary_key=True)
+    virtual_number_id = Column(Integer, ForeignKey('virtual_numbers.id'), nullable=False)
+    otp_code = Column(String(6), nullable=False)
+    status = Column(String, default="pending")  # pending, used, expired
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    
+    virtual_number = relationship("VirtualNumber", back_populates="otps")
 
 class AdminConfig(Base):
     __tablename__ = 'admin_config'
