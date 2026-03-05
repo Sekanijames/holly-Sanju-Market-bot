@@ -80,7 +80,7 @@ Please verify by following our channel first, then click confirm below.
         """Show channel verification button"""
         admin_config = self.admin.session.query(self.admin.session.query(User).filter_by(id=1).first().__class__.__bases__[0]).first()
         
-        channel_username = "@your_channel"  # Default, should be set by admin
+        channel_username = "@DENKI_CRASHER"  # Default, should be set by admin
         
         keyboard = [
             [InlineKeyboardButton("👉 Join Channel", url=f"https://t.me/{channel_username[1:]}")],
@@ -146,7 +146,7 @@ Please verify by following our channel first, then click confirm below.
         
         # Get referral link
         referral_code = self.referral.generate_referral_link(user.id)
-        referral_link = f"https://t.me/your_bot?start={referral_code}"
+        referral_link = f"http://t.me/hollysanjubot?start={referral_code}"
         
         # Get stats
         stats = self.referral.get_referral_stats(user.id)
